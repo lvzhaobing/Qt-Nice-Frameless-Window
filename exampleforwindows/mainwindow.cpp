@@ -12,17 +12,17 @@ MainWindow::MainWindow(QWidget *parent) :
     setResizeableAreaWidth(8);
 
     //set titlebar widget, wo we can drag MainWindow by it
-    setTitleBar(ui->widgetTitlebar);
+//    setTitleBar(ui->widgetTitlebar);
 
     //labelTitleText is a child widget of widgetTitlebar
     //add labelTitleText to ignore list, so we can drag MainWindow by it too
-    addIgnoreWidget(ui->labelTitleText);
+//    addIgnoreWidget(ui->labelTitleText);
 
     //further more, btnMin/btnMax... are child widgets of widgetTitlebar too
     //but we DO NOT want to drag MainWindow by them
 #endif
 
-    ui->labelMargins->setText(currentMargins());
+//    ui->labelMargins->setText(currentMargins());
 }
 
 MainWindow::~MainWindow()
@@ -55,7 +55,7 @@ void MainWindow::on_btnIncreaseMargin_clicked()
     QMargins margin = contentsMargins();
     margin += 2;
     setContentsMargins(margin);
-    ui->labelMargins->setText(currentMargins());
+//    ui->labelMargins->setText(currentMargins());
 }
 
 void MainWindow::on_btnDecreaseMargin_clicked()
@@ -63,7 +63,7 @@ void MainWindow::on_btnDecreaseMargin_clicked()
     QMargins margin = contentsMargins();
     margin -= 2;
     setContentsMargins(margin);
-    ui->labelMargins->setText(currentMargins());
+//    ui->labelMargins->setText(currentMargins());
 }
 
 QString MainWindow::currentMargins()

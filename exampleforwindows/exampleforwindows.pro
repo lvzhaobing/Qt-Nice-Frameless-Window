@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui quickwidgets
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -31,3 +31,6 @@ else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/
 else:macx: PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/libframelesswindow.a
 
 include (../projectinclude/common.pri)
+
+RESOURCES += \
+    exampleforwindows.qrc
