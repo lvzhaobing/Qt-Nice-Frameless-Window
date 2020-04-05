@@ -3,21 +3,17 @@
 #include <QPoint>
 #include <QSize>
 #ifdef Q_OS_WIN
-
-#include <windows.h>
 #include <WinUser.h>
 #include <windowsx.h>
 #include <dwmapi.h>
-#include <objidl.h> // Fixes error C2504: 'IUnknown' : base class undefined
 #include <QString>
-//#include <gdiplus.h>
-//#include <GdiPlusColor.h>
 #pragma comment (lib,"Dwmapi.lib") // Adds missing library, fixes error LNK2019: unresolved external symbol __imp__DwmExtendFrameIntoClientArea
 #pragma comment (lib,"user32.lib")
 
 CFramelessWindow::CFramelessWindow(QWidget *parent)
     : QMainWindow(parent),
       m_titlebar(Q_NULLPTR),
+      m_titlebarItem(Q_NULLPTR),
       m_borderWidth(5),
       m_bJustMaximized(false),
       m_resizeable(true)
@@ -43,17 +39,14 @@ QString CFramelessWindow::title() const
     return this->windowTitle();
 }
 
-QString CFramelessWindow::source() const
+QUrl CFramelessWindow::source() const
 {
     return m_source;
 }
 
 QQuickItem *CFramelessWindow::rootItem() const
 {
-    if(m_quickWidget->rootObject() != nullptr && m_quickWidget->rootObject()->childItems().count() > 0)
-        return m_quickWidget->rootObject()->childItems().first();
-    else
-        return nullptr;
+    return m_quickWidget->rootObject();
 }
 
 QMargins CFramelessWindow::contentsMargins() const
@@ -105,24 +98,16 @@ void CFramelessWindow::setTitle(QString title)
     emit titleChanged(title);
 }
 
-void CFramelessWindow::setSource(QString source)
+void CFramelessWindow::setSource(QUrl source)
 {
     if(m_quickWidget == nullptr)
         return;
     if (m_source == source)
         return;
     m_source = source;
-    if(m_quickWidget != nullptr) {
-        m_quickWidget->setSource(QUrl(m_source));
-    }
+    m_quickWidget->setSource(m_source);
     emit sourceChanged(m_source);
 }
-
-void CFramelessWindow::setRootItem(QQuickItem *rootItem)
-{
-
-}
-
 
 void CFramelessWindow::showFullScreen()
 {
@@ -207,6 +192,13 @@ void CFramelessWindow::setTitleBar(QWidget* titlebar)
 {
     m_titlebar = titlebar;
     if (!titlebar) return;
+    connect(titlebar, SIGNAL(destroyed(QObject*)), this, SLOT(onTitleBarDestroyed()));
+}
+
+void CFramelessWindow::setTitleBarItem(QQuickItem *titlebar)
+{
+    m_titlebarItem = titlebar;
+    if(!titlebar) return;
     connect(titlebar, SIGNAL(destroyed(QObject*)), this, SLOT(onTitleBarDestroyed()));
 }
 
@@ -315,14 +307,24 @@ bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, l
 
         //*result still equals 0, that means the cursor locate OUTSIDE the frame area
         //but it may locate in titlebar area
-        if (!m_titlebar) return false;
+        if (!m_titlebar && !m_titlebarItem) return false;
 
         //support highdpi
         double dpr = this->devicePixelRatioF();
-        QPoint pos = m_titlebar->mapFromGlobal(QPoint(x/dpr,y/dpr));
-
-        if (!m_titlebar->rect().contains(pos)) return false;
-        QWidget* child = m_titlebar->childAt(pos);
+        QWidget* child  = Q_NULLPTR;
+        QQuickItem* childItem = Q_NULLPTR;
+        if(m_titlebar)
+        {
+            QPoint pos = m_titlebar->mapFromGlobal(QPoint(x/dpr,y/dpr));
+            if (!m_titlebar->rect().contains(pos)) return false;
+            child = m_titlebar->childAt(pos);
+        }
+        if(m_titlebarItem)
+        {
+            QPointF pos = m_titlebarItem->mapFromGlobal(QPoint(x/dpr,y/dpr));
+            if (!m_titlebarItem->contains(pos)) return false;
+            childItem = m_titlebarItem->childAt(pos.x(),pos.y());
+        }
         if (!child)
         {
             *result = HTCAPTION;
@@ -376,8 +378,11 @@ void CFramelessWindow::onTitleBarDestroyed()
     {
         m_titlebar = Q_NULLPTR;
     }
+
+    if (m_titlebarItem == QObject::sender())
+    {
+        m_titlebarItem = Q_NULLPTR;
+    }
 }
-
-
 
 #endif //Q_OS_WIN

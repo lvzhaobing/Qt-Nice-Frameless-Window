@@ -1,9 +1,9 @@
 ﻿import QtQuick 2.0
-
 Item {
-    Rectangle {
-        width: parent.width
-        height: 50
-        color: "red"
+    id: root
+    property var window : null
+    function setParentWindow(window) {
+        root.window = window;
     }
 }
+

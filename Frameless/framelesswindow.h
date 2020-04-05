@@ -23,15 +23,15 @@ class CFramelessWindow : public QMainWindow
     Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
     Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
     Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
-    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
-    Q_PROPERTY(QQuickItem *rootItem READ rootItem WRITE setRootItem NOTIFY rootItemChanged)
+    Q_PROPERTY(QUrl source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QQuickItem *rootItem READ rootItem NOTIFY rootItemChanged)
 
 public:
     explicit CFramelessWindow(QWidget *parent = 0);
 
 public:
     QString title() const;
-    QString source() const;
+    QUrl source() const;
     QQuickItem *rootItem() const;
     QMargins contentsMargins() const;
     QRect contentsRect() const;
@@ -42,8 +42,7 @@ public slots:
     void setWidth(int width);
     void setHeight(int height);
     void setTitle(QString title);
-    void setSource(QString source);
-    void setRootItem(QQuickItem * rootItem);
+    void setSource(QUrl source);
     void showFullScreen();
     void setContentsMargins(const QMargins &margins);
     void setContentsMargins(int left, int top, int right, int bottom);
@@ -61,6 +60,7 @@ public slots:
     //设置一个标题栏widget，此widget会被当做标题栏对待
     //set a widget which will be treat as SYSTEM titlebar
     void setTitleBar(QWidget* titlebar);
+    void setTitleBarItem(QQuickItem* titlebar);
 
     //在标题栏控件内，也可以有子控件如标签控件“label1”，此label1遮盖了标题栏，导致不能通过label1拖动窗口
     //要解决此问题，使用addIgnoreWidget(label1)
@@ -73,8 +73,8 @@ signals:
     void widthChanged(int width);
     void heightChanged(int height);
     void titleChanged(QString title);
-    void sourceChanged(QString source);
-    void rootItemChanged(QQuickItem * rootItem);
+    void sourceChanged(QUrl source);
+    void rootItemChanged(QQuickItem *rootItem);
 
 protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result);
@@ -84,15 +84,16 @@ private slots:
 private:
     QWidget* m_titlebar;
     QList<QWidget*> m_whiteList;
+    QQuickItem* m_titlebarItem;
+    QList<QQuickItem*> m_itemWhiteList;
     int m_borderWidth;
 
     QMargins m_margins;
     QMargins m_frames;
     bool m_bJustMaximized;
     bool m_resizeable;
-    QWidget *m_centralWidget;
     QQuickWidget *m_quickWidget;
-    QString m_source;
+    QUrl m_source;
 };
 
 #elif defined Q_OS_MAC

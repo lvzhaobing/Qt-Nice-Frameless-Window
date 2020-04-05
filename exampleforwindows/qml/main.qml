@@ -5,4 +5,10 @@ import "qrc:/qml/Window"
 FramelessWindow {
     id:window
     title: "Frameless"
+    source: "qrc:/qml/MainPageView.qml"
+
+    Component.onCompleted: {
+        if(rootItem !== null)
+            rootItem.setParentWindow(window);
+    }
 }
