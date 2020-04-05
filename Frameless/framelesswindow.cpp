@@ -9,8 +9,9 @@
 #include <windowsx.h>
 #include <dwmapi.h>
 #include <objidl.h> // Fixes error C2504: 'IUnknown' : base class undefined
-#include <gdiplus.h>
-#include <GdiPlusColor.h>
+#include <QString>
+//#include <gdiplus.h>
+//#include <GdiPlusColor.h>
 #pragma comment (lib,"Dwmapi.lib") // Adds missing library, fixes error LNK2019: unresolved external symbol __imp__DwmExtendFrameIntoClientArea
 #pragma comment (lib,"user32.lib")
 
@@ -19,25 +20,157 @@ CFramelessWindow::CFramelessWindow(QWidget *parent)
       m_titlebar(Q_NULLPTR),
       m_borderWidth(5),
       m_bJustMaximized(false),
-      m_bResizeable(true)
+      m_resizeable(true)
 {
-//    setWindowFlag(Qt::Window,true);
-//    setWindowFlag(Qt::FramelessWindowHint, true);
-//    setWindowFlag(Qt::WindowSystemMenuHint, true);
-//    setWindowFlag() is not avaliable before Qt v5.9, so we should use setWindowFlags instead
+    //    setWindowFlag(Qt::Window,true);
+    //    setWindowFlag(Qt::FramelessWindowHint, true);
+    //    setWindowFlag(Qt::WindowSystemMenuHint, true);
+    //    setWindowFlag() is not avaliable before Qt v5.9, so we should use setWindowFlags instead
 
     setWindowFlags(windowFlags() | Qt::Window | Qt::FramelessWindowHint | Qt::WindowSystemMenuHint);
 
-    setResizeable(m_bResizeable);
+    setResizeable(m_resizeable);
+    m_quickWidget = new QQuickWidget(this);
+    m_quickWidget->setObjectName(QString::fromUtf8("quickWidget"));
+    m_quickWidget->setBaseSize(QSize(this->width(),this->height()));
+    m_quickWidget->setResizeMode(QQuickWidget::SizeRootObjectToView);
+    m_quickWidget->setSource(QUrl(QString::fromUtf8("qrc:/qml/Pages/BaseWindowView.qml")));
+    this->setCentralWidget(m_quickWidget);
+}
+
+QString CFramelessWindow::title() const
+{
+    return this->windowTitle();
+}
+
+QString CFramelessWindow::source() const
+{
+    return m_source;
+}
+
+QQuickItem *CFramelessWindow::rootItem() const
+{
+    if(m_quickWidget->rootObject() != nullptr && m_quickWidget->rootObject()->childItems().count() > 0)
+        return m_quickWidget->rootObject()->childItems().first();
+    else
+        return nullptr;
+}
+
+QMargins CFramelessWindow::contentsMargins() const
+{
+    QMargins margins = QMainWindow::contentsMargins();
+    margins -= m_frames;
+    return margins;
+}
+
+QRect CFramelessWindow::contentsRect() const
+{
+    QRect rect = QMainWindow::contentsRect();
+    int width = rect.width();
+    int height = rect.height();
+    rect.setLeft(rect.left() - m_frames.left());
+    rect.setTop(rect.top() - m_frames.top());
+    rect.setWidth(width);
+    rect.setHeight(height);
+    return rect;
+}
+
+bool CFramelessWindow::isResizeable()
+{
+    return m_resizeable;
+}
+
+void CFramelessWindow::setWidth(int width)
+{
+    if (this->width() == width)
+        return;
+
+    this->resize(width,this->height());
+    emit widthChanged(width);
+}
+
+void CFramelessWindow::setHeight(int height)
+{
+    if (this->height() == height)
+        return;
+    this->resize(this->width(),height);
+    emit heightChanged(height);
+}
+
+void CFramelessWindow::setTitle(QString title)
+{
+    if (this->windowTitle() == title)
+        return;
+    this->setWindowTitle(title);
+    emit titleChanged(title);
+}
+
+void CFramelessWindow::setSource(QString source)
+{
+    if(m_quickWidget == nullptr)
+        return;
+    if (m_source == source)
+        return;
+    m_source = source;
+    if(m_quickWidget != nullptr) {
+        m_quickWidget->setSource(QUrl(m_source));
+    }
+    emit sourceChanged(m_source);
+}
+
+void CFramelessWindow::setRootItem(QQuickItem *rootItem)
+{
+
+}
+
+
+void CFramelessWindow::showFullScreen()
+{
+    if (isMaximized())
+    {
+        QMainWindow::setContentsMargins(m_margins);
+        m_frames = QMargins();
+    }
+    QMainWindow::showFullScreen();
+}
+
+void CFramelessWindow::setContentsMargins(const QMargins &margins)
+{
+    QMainWindow::setContentsMargins(margins+m_frames);
+    m_margins = margins;
+}
+void CFramelessWindow::setContentsMargins(int left, int top, int right, int bottom)
+{
+    QMainWindow::setContentsMargins(left+m_frames.left(),\
+                                    top+m_frames.top(), \
+                                    right+m_frames.right(), \
+                                    bottom+m_frames.bottom());
+    m_margins.setLeft(left);
+    m_margins.setTop(top);
+    m_margins.setRight(right);
+    m_margins.setBottom(bottom);
+}
+
+void CFramelessWindow::getContentsMargins(int *left, int *top, int *right, int *bottom) const
+{
+    QMainWindow::getContentsMargins(left,top,right,bottom);
+    if (!(left&&top&&right&&bottom)) return;
+    if (isMaximized())
+    {
+        *left -= m_frames.left();
+        *top -= m_frames.top();
+        *right -= m_frames.right();
+        *bottom -= m_frames.bottom();
+    }
 }
 
 void CFramelessWindow::setResizeable(bool resizeable)
 {
     bool visible = isVisible();
-    m_bResizeable = resizeable;
-    if (m_bResizeable){
+    m_resizeable = resizeable;
+    if (m_resizeable){
         setWindowFlags(windowFlags() | Qt::WindowMaximizeButtonHint);
-//        setWindowFlag(Qt::WindowMaximizeButtonHint);
+        //        setWindowFlag(Qt::WindowMaximizeButtonHint);
 
         //此行代码可以带回Aero效果，同时也带回了标题栏和边框,在nativeEvent()会再次去掉标题栏
         //
@@ -48,7 +181,7 @@ void CFramelessWindow::setResizeable(bool resizeable)
         ::SetWindowLong(hwnd, GWL_STYLE, style | WS_MAXIMIZEBOX | WS_THICKFRAME | WS_CAPTION);
     }else{
         setWindowFlags(windowFlags() & ~Qt::WindowMaximizeButtonHint);
-//        setWindowFlag(Qt::WindowMaximizeButtonHint,false);
+        //        setWindowFlag(Qt::WindowMaximizeButtonHint,false);
 
         HWND hwnd = (HWND)this->winId();
         DWORD style = ::GetWindowLong(hwnd, GWL_STYLE);
@@ -77,14 +210,6 @@ void CFramelessWindow::setTitleBar(QWidget* titlebar)
     connect(titlebar, SIGNAL(destroyed(QObject*)), this, SLOT(onTitleBarDestroyed()));
 }
 
-void CFramelessWindow::onTitleBarDestroyed()
-{
-    if (m_titlebar == QObject::sender())
-    {
-        m_titlebar = Q_NULLPTR;
-    }
-}
-
 void CFramelessWindow::addIgnoreWidget(QWidget* widget)
 {
     if (!widget) return;
@@ -92,22 +217,24 @@ void CFramelessWindow::addIgnoreWidget(QWidget* widget)
     m_whiteList.append(widget);
 }
 
+
+
 bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, long *result)
 {
     //Workaround for known bug -> check Qt forum : https://forum.qt.io/topic/93141/qtablewidget-itemselectionchanged/13
-    #if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
+#if (QT_VERSION == QT_VERSION_CHECK(5, 11, 1))
     MSG* msg = *reinterpret_cast<MSG**>(message);
-    #else
+#else
     MSG* msg = reinterpret_cast<MSG*>(message);
-    #endif
-    
+#endif
+
     switch (msg->message)
     {
     case WM_NCCALCSIZE:
     {
         NCCALCSIZE_PARAMS& params = *reinterpret_cast<NCCALCSIZE_PARAMS*>(msg->lParam);
- 	if (params.rgrc[0].top != 0)
-		params.rgrc[0].top -= 1;
+        if (params.rgrc[0].top != 0)
+            params.rgrc[0].top -= 1;
 
         //this kills the window frame and title bar we added with WS_THICKFRAME and WS_CAPTION
         *result = WVR_REDRAW;
@@ -124,7 +251,7 @@ bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, l
         long x = GET_X_LPARAM(msg->lParam);
         long y = GET_Y_LPARAM(msg->lParam);
 
-        if(m_bResizeable)
+        if(m_resizeable)
         {
 
             bool resizeWidth = minimumWidth() != maximumWidth();
@@ -243,59 +370,14 @@ bool CFramelessWindow::nativeEvent(const QByteArray &eventType, void *message, l
     }
 }
 
-void CFramelessWindow::setContentsMargins(const QMargins &margins)
+void CFramelessWindow::onTitleBarDestroyed()
 {
-    QMainWindow::setContentsMargins(margins+m_frames);
-    m_margins = margins;
-}
-void CFramelessWindow::setContentsMargins(int left, int top, int right, int bottom)
-{
-    QMainWindow::setContentsMargins(left+m_frames.left(),\
-                                    top+m_frames.top(), \
-                                    right+m_frames.right(), \
-                                    bottom+m_frames.bottom());
-    m_margins.setLeft(left);
-    m_margins.setTop(top);
-    m_margins.setRight(right);
-    m_margins.setBottom(bottom);
-}
-QMargins CFramelessWindow::contentsMargins() const
-{
-    QMargins margins = QMainWindow::contentsMargins();
-    margins -= m_frames;
-    return margins;
-}
-void CFramelessWindow::getContentsMargins(int *left, int *top, int *right, int *bottom) const
-{
-    QMainWindow::getContentsMargins(left,top,right,bottom);
-    if (!(left&&top&&right&&bottom)) return;
-    if (isMaximized())
+    if (m_titlebar == QObject::sender())
     {
-        *left -= m_frames.left();
-        *top -= m_frames.top();
-        *right -= m_frames.right();
-        *bottom -= m_frames.bottom();
+        m_titlebar = Q_NULLPTR;
     }
 }
-QRect CFramelessWindow::contentsRect() const
-{
-    QRect rect = QMainWindow::contentsRect();
-    int width = rect.width();
-    int height = rect.height();
-    rect.setLeft(rect.left() - m_frames.left());
-    rect.setTop(rect.top() - m_frames.top());
-    rect.setWidth(width);
-    rect.setHeight(height);
-    return rect;
-}
-void CFramelessWindow::showFullScreen()
-{
-    if (isMaximized())
-    {
-        QMainWindow::setContentsMargins(m_margins);
-        m_frames = QMargins();
-    }
-    QMainWindow::showFullScreen();
-}
+
+
 
 #endif //Q_OS_WIN

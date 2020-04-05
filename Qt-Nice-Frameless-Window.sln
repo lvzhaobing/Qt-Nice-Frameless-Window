@@ -1,0 +1,34 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29920.165
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "framelesswindow", "framelesswindow\framelesswindow.vcxproj", "{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "exampleforwindows", "exampleforwindows\exampleforwindows.vcxproj", "{CF886831-2433-3B9D-AA32-7E98104FACE0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB} = {08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}.Debug|x64.ActiveCfg = Debug|x64
+		{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}.Debug|x64.Build.0 = Debug|x64
+		{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}.Release|x64.ActiveCfg = Release|x64
+		{08130FCF-43B0-32C1-A90C-AE0D5A0BBBFB}.Release|x64.Build.0 = Release|x64
+		{CF886831-2433-3B9D-AA32-7E98104FACE0}.Debug|x64.ActiveCfg = Debug|x64
+		{CF886831-2433-3B9D-AA32-7E98104FACE0}.Debug|x64.Build.0 = Debug|x64
+		{CF886831-2433-3B9D-AA32-7E98104FACE0}.Release|x64.ActiveCfg = Release|x64
+		{CF886831-2433-3B9D-AA32-7E98104FACE0}.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		Qt5Version = 5.14.1
+		SolutionGuid = {8C5E5DD9-4AC8-402C-9543-0F081207BB51}
+	EndGlobalSection
+EndGlobal

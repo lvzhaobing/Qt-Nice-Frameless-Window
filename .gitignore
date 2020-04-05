@@ -5,3 +5,10 @@ build*/
 
 #mac
 .DS_Store
+.vs/
+exampleforwindows/release/
+exampleforwindows/x64/
+Frameless/debug/
+Frameless/x64/
+Frameless/release/
+exampleforwindows/debug/

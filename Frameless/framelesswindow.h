@@ -3,6 +3,9 @@
 #include "qsystemdetection.h"
 #include <QObject>
 #include <QMainWindow>
+#include <QQuickItem>
+#include <QQuickWidget>
+#include <QWidget>
 
 //A nice frameless window for both Windows and OS X
 //Author: Bringer-of-Light
@@ -13,23 +16,48 @@
 #include <QList>
 #include <QMargins>
 #include <QRect>
+
 class CFramelessWindow : public QMainWindow
 {
     Q_OBJECT
+    Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(int height READ height WRITE setHeight NOTIFY heightChanged)
+    Q_PROPERTY(QString title READ title WRITE setTitle NOTIFY titleChanged)
+    Q_PROPERTY(QString source READ source WRITE setSource NOTIFY sourceChanged)
+    Q_PROPERTY(QQuickItem *rootItem READ rootItem WRITE setRootItem NOTIFY rootItemChanged)
+
 public:
     explicit CFramelessWindow(QWidget *parent = 0);
+
 public:
+    QString title() const;
+    QString source() const;
+    QQuickItem *rootItem() const;
+    QMargins contentsMargins() const;
+    QRect contentsRect() const;
+    bool isResizeable();
+
+
+public slots:
+    void setWidth(int width);
+    void setHeight(int height);
+    void setTitle(QString title);
+    void setSource(QString source);
+    void setRootItem(QQuickItem * rootItem);
+    void showFullScreen();
+    void setContentsMargins(const QMargins &margins);
+    void setContentsMargins(int left, int top, int right, int bottom);
+    void getContentsMargins(int *left, int *top, int *right, int *bottom) const;
 
     //设置是否可以通过鼠标调整窗口大小
     //if resizeable is set to false, then the window can not be resized by mouse
     //but still can be resized programtically
     void setResizeable(bool resizeable=true);
-    bool isResizeable(){return m_bResizeable;}
 
     //设置可调整大小区域的宽度，在此区域内，可以使用鼠标调整窗口大小
     //set border width, inside this aera, window can be resized by mouse
     void setResizeableAreaWidth(int width = 5);
-protected:
+
     //设置一个标题栏widget，此widget会被当做标题栏对待
     //set a widget which will be treat as SYSTEM titlebar
     void setTitleBar(QWidget* titlebar);
@@ -41,17 +69,18 @@ protected:
     //we can fix this by add "label1" to a ignorelist, just call addIgnoreWidget(label1)
     void addIgnoreWidget(QWidget* widget);
 
+signals:
+    void widthChanged(int width);
+    void heightChanged(int height);
+    void titleChanged(QString title);
+    void sourceChanged(QString source);
+    void rootItemChanged(QQuickItem * rootItem);
+
+protected:
     bool nativeEvent(const QByteArray &eventType, void *message, long *result);
 private slots:
     void onTitleBarDestroyed();
-public:
-    void setContentsMargins(const QMargins &margins);
-    void setContentsMargins(int left, int top, int right, int bottom);
-    QMargins contentsMargins() const;
-    QRect contentsRect() const;
-    void getContentsMargins(int *left, int *top, int *right, int *bottom) const;
-public slots:
-    void showFullScreen();
+
 private:
     QWidget* m_titlebar;
     QList<QWidget*> m_whiteList;
@@ -60,8 +89,10 @@ private:
     QMargins m_margins;
     QMargins m_frames;
     bool m_bJustMaximized;
-
-    bool m_bResizeable;
+    bool m_resizeable;
+    QWidget *m_centralWidget;
+    QQuickWidget *m_quickWidget;
+    QString m_source;
 };
 
 #elif defined Q_OS_MAC

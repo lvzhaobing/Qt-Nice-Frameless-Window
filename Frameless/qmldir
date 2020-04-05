@@ -1,0 +1,3 @@
+﻿module Frameless
+plugin frameless_plugin
+FramelessWindow 1.0 qml/FramelessWindow.qml

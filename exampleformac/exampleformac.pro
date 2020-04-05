@@ -33,15 +33,15 @@ FORMS += \
         mainwindow.ui
 include (../projectinclude/common.pri)
 
-win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../framelesswindow/release/ -lframelesswindow
-else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../framelesswindow/debug/ -lframelesswindow
-else:macx: LIBS += -L$$OUT_PWD/../framelesswindow/ -lframelesswindow
+win32:CONFIG(release, debug|release): LIBS += -L$$OUT_PWD/../Frameless/release/ -lframeless
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OUT_PWD/../Frameless/debug/ -lframeless
+else:macx: LIBS += -L$$OUT_PWD/../Frameless/ -lframeless
 
-INCLUDEPATH += $$PWD/../framelesswindow
-DEPENDPATH += $$PWD/../framelesswindow
+INCLUDEPATH += $$PWD/../Frameless
+DEPENDPATH += $$PWD/../Frameless
 
-win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/release/libframelesswindow.a
-else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/debug/libframelesswindow.a
-else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/release/framelesswindow.lib
-else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/debug/framelesswindow.lib
-else:macx: PRE_TARGETDEPS += $$OUT_PWD/../framelesswindow/libframelesswindow.a
+win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Frameless/release/libframeless.a
+else:win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Frameless/debug/libframeless.a
+else:win32:!win32-g++:CONFIG(release, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Frameless/release/frameless.lib
+else:win32:!win32-g++:CONFIG(debug, debug|release): PRE_TARGETDEPS += $$OUT_PWD/../Frameless/debug/frameless.lib
+else:macx: PRE_TARGETDEPS += $$OUT_PWD/../Frameless/libframeless.a

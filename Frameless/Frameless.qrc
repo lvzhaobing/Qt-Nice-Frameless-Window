@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qml/Window/FramelessWindow.qml</file>
+        <file>qml/Pages/BaseWindowView.qml</file>
+    </qresource>
+</RCC>

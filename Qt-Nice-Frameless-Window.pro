@@ -1,10 +1,10 @@
 TEMPLATE = subdirs
 CONFIG += ordered
-SUBDIRS += framelesswindow \
+SUBDIRS += Frameless \
     exampleforwindows \
 #    examplesimplest \
 #    exampleformac
 
-exampleforwindows.depends = framelesswindow
-examplesimplest.depends = framelesswindow
-exampleformac.depends = framelesswindow
+exampleforwindows.depends = Frameless
+examplesimplest.depends = Frameless
+exampleformac.depends = Frameless
